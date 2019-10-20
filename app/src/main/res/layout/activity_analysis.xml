@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context="com.example.accdec.AnalysisActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status"
+        android:textSize="16sp"
+
+        />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status"
+        android:id="@+id/status"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline3"
+
+        />
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nearest Police Station"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+        android:layout_marginTop="32dp"
+        />
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Dhanbad Police Station"
+        android:id="@+id/psdesc"
+        android:textSize="32sp"
+        />
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="8736267453"
+        android:id="@+id/psNum"
+        android:textColor="@android:color/holo_blue_bright"
+        android:textSize="32sp"
+        />
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Call Not Recommended"
+        android:id="@+id/psRec"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+        />
+    <com.google.android.material.textview.MaterialTextView        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Nearest Hospital"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+        />
+    <com.google.android.material.textview.MaterialTextView        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Central Hospital"
+        android:id="@+id/hosDesc"
+        android:textSize="32sp"
+        />
+    <com.google.android.material.textview.MaterialTextView        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="9102467854"
+        android:textColor="@android:color/holo_blue_bright"
+        android:id="@+id/hosNum"
+        android:textSize="32sp"
+        />
+    <com.google.android.material.textview.MaterialTextView        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Call Recommended"
+        android:id="@+id/hosRec"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+        />
+</LinearLayout>

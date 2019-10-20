@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
+import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
@@ -15,106 +17,66 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_analysis.*
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity() {
 
-    val PERMISSION_ID = 42
-    lateinit var mFusedLocationClient: FusedLocationProviderClient
+
+    private val PERMISSION_CODE: Int = 63
+    private lateinit var retroClient: Retrofit
+    val BASE_URL:String = "https://api.myjson.com/bins/18x78c/";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_analysis)
+        instantiateRetro()
+        getResponse()
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    }
+    private fun instantiateRetro() {
+        val interceptor = HttpLoggingInterceptor()
+        interceptor.level = HttpLoggingInterceptor.Level.BODY
 
-        getLastLocation()
+        val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .build()
+
+        retroClient = Retrofit.Builder().baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .client(okHttpClient).build()
     }
 
-    private fun getLastLocation() {
-        if (checkPermissions()) {
-            if (isLocationEnabled()) {
+    fun getResponse() {
 
-                mFusedLocationClient.lastLocation.addOnCompleteListener(this) { task ->
-                    var location: Location? = task.result
-                    if (location == null) {
-                        requestNewLocationData()
-                    } else {
-                        findViewById<TextView>(R.id.latTextView).text = location.latitude.toString()
-                        findViewById<TextView>(R.id.lonTextView).text =
-                            location.longitude.toString()
-                    }
+        retroClient.create(AccidentApi::class.java).getIssuesListResponse()
+            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onSuccess = {
+                    status.text = it.status
+                    psdesc.text = it.policeStation
+                    psNum.text = it.psNum.toString()
+                    hosDesc.text = it.hospital
+                    hosNum.text = it.hNum.toString()
+                    psRec.text = it.psRec.toString()
+                    hosRec.text = it.hRec.toString()
+
+                },
+                onError = {
+                    Toast.makeText(this,"Unable to Fetch Response, Try Again",Toast.LENGTH_LONG).show()
+                    onBackPressed()
                 }
-            } else {
-                Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show()
-                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                startActivity(intent)
-            }
-        } else {
-            requestPermissions()
-        }
+            )
     }
 
 
-    @SuppressLint("MissingPermission")
-    private fun requestNewLocationData() {
-        var mLocationRequest = LocationRequest()
-        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        mLocationRequest.interval = 0
-        mLocationRequest.fastestInterval = 0
-        mLocationRequest.numUpdates = 1
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        mFusedLocationClient!!.requestLocationUpdates(
-            mLocationRequest, mLocationCallback,
-            Looper.myLooper()
-        )
-    }
-
-    private val mLocationCallback = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult) {
-            var mLastLocation: Location = locationResult.lastLocation
-            findViewById<TextView>(R.id.latTextView).text = mLastLocation.latitude.toString()
-            findViewById<TextView>(R.id.lonTextView).text = mLastLocation.longitude.toString()
-        }
-    }
-
-    private fun isLocationEnabled(): Boolean {
-        var locationManager: LocationManager =
-            getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
-            LocationManager.NETWORK_PROVIDER
-        )
-    }
-
-    private fun checkPermissions(): Boolean {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            return true
-        }
-        return false
-    }
-
-    private fun requestPermissions() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION),
-            PERMISSION_ID
-        )
-    }
-
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        if (requestCode == PERMISSION_ID) {
-            if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                getLastLocation()
-            }
-        }
-    }
 }
